@@ -19,6 +19,20 @@ def create_app():
     app.register_blueprint(quiz_bp)      # / /hint /submit /archive  (팀원 A)
     app.register_blueprint(ranking_bp)   # /ranking /history          (팀원 B)
 
+    # 모든 템플릿에서 current_user(로그인 유저) 사용 가능 → base.html nav·유저메뉴
+    @app.context_processor
+    def inject_current_user():
+        from flask import session
+        from bson import ObjectId
+        from core.db import db
+        uid = session.get("user_id")
+        if not uid:
+            return {"current_user": None}
+        try:
+            return {"current_user": db.users.find_one({"_id": ObjectId(uid)})}
+        except Exception:
+            return {"current_user": None}
+
     try:
         ensure_indexes()
     except Exception as e:               # DB 미연결이어도 앱은 뜨게
