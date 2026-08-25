@@ -13,6 +13,8 @@ db = client["dailydrop"]          # db.users / db.problems / db.solves
 def ensure_indexes():
     """앱 시작 시 1회 호출 — 계약서(설계도)에 정의된 인덱스 보장."""
     db.users.create_index("username", unique=True)
+    db.users.create_index("nickname", unique=True)
+
     db.problems.create_index("date", unique=True)
     # 하루 1회 보장 + 재진입 상태복원
     db.solves.create_index([("user_id", ASCENDING), ("date", ASCENDING)],
