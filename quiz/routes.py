@@ -100,8 +100,9 @@ def submit():
 @quiz_bp.route("/archive")
 @login_required
 def archive():
-    # TODO(팀원 A): 지난 문제 목록 + 내 결과
+    # TODO(팀원 A): 지난 문제 목록 + 정답률
+    problems = list(db.problems.find({"date": {"$lt": get_today_date()}}).sort("date", -1))
+    solved_list = list(db.solves.find({"status": "solved"}))
+    failed_list = list(db.solves.find({"status": "failed"}))
     
-    problems = list(db.problems.find({"date": {"$lt": get_today_date()}})
-                    .sort("date", -1))
-    return render_template("quiz/archive.html", problems=problems)
+    return render_template("quiz/archive.html", problems=problems, solved_list=solved_list, failed_list=failed_list)
