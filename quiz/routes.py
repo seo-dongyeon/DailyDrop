@@ -25,17 +25,28 @@ def today():
         "date": date, "status": "solving", "hints_used": 0, "attempts_used": 0,
         "started_at": datetime.now(timezone.utc), "solved_at": None,
         "duration_sec": 0, "score": 0})
-    # TODO(팀원 A): 잠긴 힌트 노출 금지 → problem.hints[:solve.hints_used] 만 전달
+        
+        solve = db.solves.find_one({"user_id": g.user_id, "date": date})
     
-    return render_template("quiz/today.html",
-                           date=date, problem=problem, solve=solve)
+    # TODO(팀원 A): 잠긴 힌트 노출 금지 → problem.hints[:solve.hints_used] 만 전달
+    public_problem = {"id": problem["_id"], "date": date, "week": problem["week"],"title": problem["title"], 
+    "question": problem["question"], "difficulty": problem["difficulty"], 
+    "hints": problem["hints"][:solve["hints_used"]], "created_at": problem["created_at"]}
+
+    return render_template("quiz/today.html", date=date, problem=problem, solve=solve)
 
 
 @quiz_bp.route("/hint", methods=["POST"])
 @login_required
 def hint():
     # TODO(팀원 A): 다음 힌트 1개 공개 + hints_used += 1, 힌트 텍스트 반환
-    return jsonify({"todo": "hint endpoint"})
+    date = get_today_date()
+    solve = db.solves.find_one({"user_id": g.user_id, "date": date})
+    db.solves.update_one({"user_id": g.user_id, "date": date}, {"$set": {"hints_used": solve["hints_used"] + 1}})
+    solve = db.solves.find_one({"user_id": g.user_id, "date": date})
+    problem = db.problems.find_one({"date": date})
+    
+    return jsonify(problem["hints"][solve["hints_used"]])
 
 
 @quiz_bp.route("/submit", methods=["POST"])
