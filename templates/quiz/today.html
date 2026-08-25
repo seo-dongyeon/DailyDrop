@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}오늘의 퀴즈 · DailyDrop{% endblock %}
+{% block content %}
+<h2>오늘의 퀴즈 <small class="text-muted">{{ date }}</small></h2>
+
+{# ===== [팀원 A 작업 영역] ===== #}
+{# TODO: 힌트 리스트(공개된 것만) · 정답 입력폼 · 제출/힌트 버튼 · 결과 화면 #}
+{% if problem %}
+  <p class="fw-bold">{{ problem.title }}</p>
+{% else %}
+  <div class="alert alert-warning">오늘 문제가 없습니다. `python seed.py` 로 시드 데이터를 넣어주세요.</div>
+{% endif %}
+{% endblock %}

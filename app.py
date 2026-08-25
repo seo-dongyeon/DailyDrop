@@ -1,58 +1,33 @@
-import bcrypt
-import jwt
-import datetime
-from pymongo import MongoClient
-from flask import Flask, render_template, request, redirect, make_response, g
-from dotenv import load_dotenv
-from functools import wraps
+"""[내 담당] 앱 팩토리 — 블루프린트 등록만. 실제 로직은 core/ · quiz/ · ranking/."""
 import os
+from flask import Flask
+from dotenv import load_dotenv
 
-app = Flask(__name__)
+from core.db import ensure_indexes
+from core.auth import auth_bp
+from quiz.routes import quiz_bp
+from ranking.routes import ranking_bp
 
-SECRET_KEY = os.environ.get("SECRET_KEY", "dev-only-change-me")
-# DB 연결 (접속 문자열은 .env의 MONGO_URI로만 관리 — 코드/깃에 시크릿 금지)
 load_dotenv()
-uri = os.environ.get("MONGO_URI")
-client = MongoClient(uri)
-db = client["dailydrop"]
 
 
-@app.route("/")
-def home():
-    return "Hello, DailyDrop!"
+def create_app():
+    app = Flask(__name__)
+    app.secret_key = os.environ.get("SECRET_KEY", "dev-only-change-me")
+
+    app.register_blueprint(auth_bp)      # /signup /login /logout
+    app.register_blueprint(quiz_bp)      # / /hint /submit /archive  (팀원 A)
+    app.register_blueprint(ranking_bp)   # /ranking /history          (팀원 B)
+
+    try:
+        ensure_indexes()
+    except Exception as e:               # DB 미연결이어도 앱은 뜨게
+        print(f"[warn] 인덱스 생성 건너뜀: {e}")
+
+    return app
 
 
-@app.route("/signup", methods=["GET", "POST"])
-def singup():
-    if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
-
-        hashed = bcrypt.hashpw(password.encode(
-            "utf-8"), bcrypt.gensalt()).decode("utf-8")
-        db.users.insert_one({
-            "username": username,
-            "password": hashed
-        })
-        return redirect("/signup")
-    return render_template("signup.html")
-
-
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
-
-        user = db.users.find_one({"username": username})
-
-        if user and bcrypt.checkpw(password.encode("utf-8"),
-                                   user["password"].encode("utf-8")):
-            return "로그인 성공"
-        else:
-            return "아이디 또는 비밀번호가 틀렸습니다."
-    return render_template("login.html")
-
+app = create_app()
 
 if __name__ == "__main__":
     app.run(debug=True)
