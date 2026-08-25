@@ -25,7 +25,11 @@ def login_required(view):
         uid = session.get("user_id")
         if not uid:
             return redirect(url_for("auth.login"))
-        g.user_id = ObjectId(uid)
+        user = db.users.find_one({"_id": ObjectId(uid)})
+        if not user:
+            session.clear()
+            return redirect(url_for("auth.login"))
+        g.user_id = user["_id"]
         return view(*args, **kwargs)
     return wrapped
 
@@ -45,9 +49,10 @@ def signup():
                 "nickname": nickname,
                 "created_at": datetime.now(timezone.utc),
             })
-        except DuplicateKeyError:
+        except DuplicateKeyError as e:
+            field = "닉네임" if "nickname" in str(e) else "아이디"
             return render_template("auth/signup.html",
-                                   error="이미 존재하는 아이디입니다.")
+                                   error=f"이미 존재하는 {field}입니다.")
         return redirect(url_for("auth.login"))
     return render_template("auth/signup.html")
 
