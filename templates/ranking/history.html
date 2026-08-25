@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}내 기록 · DailyDrop{% endblock %}
+{% block content %}
+<h2>내 기록</h2>
+{# ===== [팀원 B 작업 영역] ===== #}
+{# TODO: 요약 통계(총 풀이·평균 힌트·streak) + 날짜·문제·결과·힌트·시간 표 #}
+<table class="table">
+  <thead><tr><th>날짜</th><th>상태</th><th>점수</th></tr></thead>
+  <tbody>
+    {% for s in mine %}
+      <tr><td>{{ s.date }}</td><td>{{ s.status }}</td><td>{{ s.score }}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
