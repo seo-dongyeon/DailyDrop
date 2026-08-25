@@ -1,12 +1,22 @@
 {% extends "base.html" %}
 {% block title %}회원가입 · DailyDrop{% endblock %}
 {% block content %}
-<h2>회원가입</h2>
-{% if error %}<p class="text-danger">{{ error }}</p>{% endif %}
-<form method="post" action="{{ url_for('auth.signup') }}">
-  <input name="username" placeholder="아이디"><br>
-  <input name="password" type="password" placeholder="비밀번호"><br>
-  <input name="nickname" placeholder="닉네임 (랭킹 표시명)"><br>
-  <button type="submit">가입하기</button>
-</form>
+<div class="d-flex justify-content-center mt-5">
+  <div class="card shadow-sm p-5" style="width: 360px;">
+    <h4 class="text-center mb-3 fw-bold">회원가입</h4>
+    {% if error %}<p class="text-danger">{{ error }}</p>{% endif %}
+    <form method="post" action="{{ url_for('auth.signup') }}">
+      <div class="mb-3">
+        <input name="username" class="form-control" placeholder="아이디">
+      </div>
+      <div class="mb-3">
+        <input name="password" class="form-control" type="password" placeholder="비밀번호">
+      </div>
+      <div class="mb-3">
+        <input name="nickname" class="form-control" placeholder="닉네임 (랭킹 표시명)">
+      </div>
+      <button type="submit" class="btn btn-primary w-100">가입하기</button>
+    </form>
+  </div>
+</div>
 {% endblock %}
