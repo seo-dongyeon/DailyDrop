@@ -44,4 +44,39 @@ def ranking():
 def history():
     # TODO(팀원 B): 내 풀이 히스토리 + 통계(총 풀이·평균 힌트·streak)
     mine = list(db.solves.find({"user_id": g.user_id}).sort("date", -1))
-    return render_template("ranking/history.html", mine=mine)
+    history = []
+    for m in mine:
+        problem = db.problems.find_one({"_id": m["problem_id"]})
+        history.append({
+            "date": m["date"],
+            "problem_title": problem["title"] if problem else "문제 없음",
+            "status": m["status"],
+            "hints_used": m.get("hints_used", 0),
+            "duration_sec": m.get("duration_sec", 0),
+        })
+
+    total = len(mine)
+    avg_hints = round(sum(r.get("hints_used", 0) for r in mine) / total, 1) if total else 0
+    avg_solved = round((sum(r.get("status") == "solved" for r in mine) / total)*100, 1) if total else 0
+
+    # max_streak 구현
+    # 1) 날짜 최신순으로 정렬 + status="solved"인 데이터만 추출
+    dates = []
+    for m in mine:
+        if(m["status"] == "solved"):
+            dates.append(m.get("date"))
+    # 2) 연속이면 current_streak+1
+    #   Q.2-1) 연속인지 아닌지 판별하는 방법이 뭘까?
+    #   A. timedelta 객체를 사용하여 두 날짜 사이의 일수 차이를 계산한다. 기준 날짜 - 이전 날짜 수 == 1 => current_streak+1
+    current_streak = 0
+    max_streak = 0
+    for idx, m in enumerate(dates, start=1):
+        if((dates[idx]-dates[idx-1]).days == 1):
+            current_streak += 1
+        else:
+            
+    # 3) current_streak > max_streak => max_streak = current_streak break
+        if(current_streak > max_streak):
+            max_streak = current_streak
+    
+    return render_template("ranking/history.html", mine=history, total=total, avg_solved=avg_solved, avg_hints=avg_hints)
