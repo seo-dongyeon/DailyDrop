@@ -25,7 +25,11 @@ def login_required(view):
         uid = session.get("user_id")
         if not uid:
             return redirect(url_for("auth.login"))
-        g.user_id = ObjectId(uid)
+        user = db.users.find_one({"_id": ObjectId(uid)})
+        if not user:
+            session.clear()
+            return redirect(url_for("auth.login"))
+        g.user_id = user["_id"]
         return view(*args, **kwargs)
     return wrapped
 
