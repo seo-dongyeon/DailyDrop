@@ -45,9 +45,10 @@ def signup():
                 "nickname": nickname,
                 "created_at": datetime.now(timezone.utc),
             })
-        except DuplicateKeyError:
+        except DuplicateKeyError as e:
+            field = "닉네임" if "nickname" in str(e) else "아이디"
             return render_template("auth/signup.html",
-                                   error="이미 존재하는 아이디입니다.")
+                                   error=f"이미 존재하는 {field}입니다.")
         return redirect(url_for("auth.login"))
     return render_template("auth/signup.html")
 
