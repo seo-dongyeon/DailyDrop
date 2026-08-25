@@ -20,7 +20,13 @@ def today():
     problem = db.problems.find_one({"date": date})
     solve = db.solves.find_one({"user_id": g.user_id, "date": date})
     # TODO(팀원 A): solve 없으면 status="solving" 문서 생성 (§3 스니펫)
+    if solve is None:
+        db.solves.insert_one({"user_id": g.user_id, "problem_id": problem["_id"],
+        "date": date, "status": "solving", "hints_used": 0, "attempts_used": 0,
+        "started_at": datetime.now(timezone.utc), "solved_at": None,
+        "duration_sec": 0, "score": 0})
     # TODO(팀원 A): 잠긴 힌트 노출 금지 → problem.hints[:solve.hints_used] 만 전달
+    
     return render_template("quiz/today.html",
                            date=date, problem=problem, solve=solve)
 
