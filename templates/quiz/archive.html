@@ -15,7 +15,8 @@
           {{ p.title }} - 정답: {{p.answer}}
         </p>
         <p class="text-end">
-          
+          정답률: {{ accu_list[loop.index0] }}%
+        </p>
       </div>
     </div>
   {% endfor %}

@@ -104,5 +104,20 @@ def archive():
     problems = list(db.problems.find({"date": {"$lt": get_today_date()}}).sort("date", -1))
     solved_list = list(db.solves.find({"status": "solved"}))
     failed_list = list(db.solves.find({"status": "failed"}))
-    
-    return render_template("quiz/archive.html", problems=problems, solved_list=solved_list, failed_list=failed_list)
+    accu_list = []
+    for i in problems:
+        for x in solved_list:
+            solved_num = 0
+            if i["date"] == x["date"]:
+                solved_num += 1
+        for y in failed_list:
+                    failed_num = 0
+                    if i["date"] == y["date"]:
+                        failed_num += 1
+        if solved_num + failed_num == 0:
+            accu = 0
+        else:
+            accu = solved_num / (solved_num + failed_num)
+        accu_list.append(accu * 100)
+        
+    return render_template("quiz/archive.html", problems=problems, accu_list=accu_list)
