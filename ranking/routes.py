@@ -45,15 +45,28 @@ def liveRanking():
             "score": row["score"],
         })
 
-    # 테스트용 데이터 - mock_rows
-    mock_rows = [
-        {"rank": 1, "nickname": "테스트1", "score": random.randint(900, 1000)},
-        {"rank": 2, "nickname": "테스트2", "score": random.randint(900, 1000)},
-        {"rank": 3, "nickname": "테스트3", "score": random.randint(900, 1000)},
-    ]
+    ########################################################################################
+    # # ❗️테스트용 데이터 - mock_rows
+    # users = [
+    #     {"rank": 1, "nickname": "테스트1", "score": random.randint(900, 1000)},
+    #     {"rank": 2, "nickname": "테스트2", "score": random.randint(900, 1000)},
+    #     {"rank": 3, "nickname": "테스트3", "score": random.randint(900, 1000)},
+    # ]  
+    # # 2. 점수(score) 기준 내림차순 정렬 📉
+    # users_sorted = sorted(users, key=lambda x: x["score"], reverse=True)
+    
+    # # 3. 정렬된 순서대로 rank 부여 및 Top 3 추출 🏆
+    # mock_rows = []
+    # for idx, user in enumerate(users_sorted[:3]):
+    #     mock_rows.append({
+    #         "rank": idx + 1,  # 1위, 2위, 3위
+    #         "nickname": user["nickname"],
+    #         "score": user["score"]
+    #     })
+    ########################################################################################            
     return jsonify({
         "status": "success",
-        "rows": mock_rows
+        "rows": rank_rows
     })
 
 
@@ -105,3 +118,21 @@ def history():
 
     
     return render_template("ranking/history.html", mine=history, total=total, avg_solved=avg_solved, avg_hints=avg_hints, max_streak=max_streak)
+
+@ranking_bp.route("/ranking/side_panel/_stats_panel", methods=['GET'])
+@login_required
+def stats():
+    date = get_today_date()
+    rows = list(db.solves.find({"date": date}))
+
+    total_attempts = len(rows) # 퀴즈가 나온 시점의 총 도전 수
+    total_avg_solved = round((sum(r.get("status") == "solved" for r in rows) / total_attempts)*100, 1) if total_attempts else 0
+    total_avg_hints = round((sum(r.get("hints_used")== 0 for r in rows)) / total_attempts, 1) if total_attempts else 0
+
+    print(total_avg_solved,total_avg_hints,total_attempts)
+    return jsonify({
+        "status": "success",
+        "attempts": total_attempts,
+        "hints": total_avg_hints,
+        "solved": total_avg_solved,
+    })

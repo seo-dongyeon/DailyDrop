@@ -1,5 +1,6 @@
 <div class="card p-3 mb-3" style="border:2px dashed #c7c9e0;">
     <div class="position-relative d-flex justify-content-center align-items-center mb-2">
+        <span class='fs-3'>🏆</span>
         <span class="fw-bold fs-3">오늘의 랭킹</span>
             <a class="btn btn-outline-secondary btn-sm rounded-pill position-absolute end-0" href="ranking" style="">
                 전체 랭킹 보기<i class="bi bi-arrow-right"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"/></svg></i>
@@ -16,6 +17,7 @@
                 </tr>
             </thead>
             <tbody class="table-body">
+                <!-- ajax로 구현 -->
             </tbody>
         </table>
     </div>
@@ -26,7 +28,7 @@
     $(document).ready(function(){
         getRanking();
         
-        setInterval(getRanking, 1000)
+        setInterval(getRanking, 60000)
     })
     function getRanking(){
         $.ajax({
@@ -60,7 +62,7 @@
                         `;
                     
                 }
-                $(".table-body").html(trHtml);
+                $(".table-body").html (trHtml);
             }
         })
     }
