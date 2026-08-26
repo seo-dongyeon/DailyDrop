@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, g, jsonify
 from core.db import db
 from core.auth import login_required
 from core.utils import get_today_date
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import random
 
 ranking_bp = Blueprint("ranking", __name__)
@@ -18,13 +18,14 @@ def ranking():
     # 순위를 나타낼 때 예외 사항 
     # 1) 점수 동일 2) 힌트 사용횟수 동일 3) 풀이완료시각 동일 조건일 경우 -> 공동 순위 부여
     rank_rows = []
+    KST = timezone(timedelta(hours=9))
     for idx, row in enumerate(rows, start=1):
         user = db.users.find_one({"_id": row["user_id"]})
         rank_rows.append({
             "rank": idx,
             "nickname": user["nickname"] if user else "알 수 없음",
             "score": row["score"],
-            "solved_at": row["solved_at"],
+            "solved_at": row["solved_at"].replace(tzinfo=timezone.utc).astimezone(KST),
             "hints_used": row["hints_used"],
             "is_me": row["user_id"] == g.user_id
         })
