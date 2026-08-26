@@ -23,9 +23,9 @@
       </div>
       <hr>
       {% if problem %}
-        <p class="text-center fs-5 mb-3">{{ problem.title }} <span class="text-muted fs-6">(예시)</span></p>
+      <p class="text-center fs-5 mb-3">{{ problem.title }} <span class="text-muted fs-6">(예시)</span></p>
       {% else %}
-        <div class="alert alert-warning">오늘 문제 없음 → <code>python seed.py</code> 실행</div>
+      <div class="alert alert-warning">오늘 문제 없음 → <code>python seed.py</code> 실행</div>
       {% endif %}
       {# 아래는 레이아웃 참고용 자리표시 (팀원 A가 실제 동작 구현) #}
       <div class="d-flex gap-2 mb-2">
@@ -45,19 +45,17 @@
 
   <!-- ===== 우측: 랭킹 + 통계 [팀원 B 작업 영역] ===== -->
   <div class="col-lg-4">
+    <!-- 랭킹: 1분 폴링 (확정) -->
     <div class="card p-3 mb-3" style="border:2px dashed #c7c9e0;">
-      <div class="text-center mb-2">
-        <span class="badge text-bg-secondary">[ 팀원 B 작업 영역 ]</span>
-        <div class="fw-bold mt-2">오늘의 랭킹</div>
-      </div>
-      <small class="text-muted text-center d-block">순위·닉네임·점수 표 (score DESC). ranking/ 사이드 partial · 작업순서 §2</small>
+      <!-- <div id="ranking-panel"> -->
+      {% include "ranking/side_panel/_ranking_panel.html" %}
+      <!-- </div> -->
+
     </div>
     <div class="card p-3" style="border:2px dashed #c7c9e0;">
-      <div class="text-center mb-2">
-        <span class="badge text-bg-secondary">[ 팀원 B 작업 영역 ]</span>
-        <div class="fw-bold mt-2">오늘의 통계</div>
-      </div>
-      <small class="text-muted text-center d-block">도전 수 · 성공률 · 평균 힌트</small>
+      <!-- <div id="stats-panel"> -->
+      {% include "ranking/side_panel/_stats_panel.html" %}
+      <!-- </div> -->
     </div>
   </div>
 
