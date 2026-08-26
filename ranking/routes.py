@@ -1,8 +1,9 @@
-from flask import Blueprint, render_template, g
+from flask import Blueprint, render_template, g, jsonify
 from core.db import db
 from core.auth import login_required
 from core.utils import get_today_date
 from datetime import datetime
+import random
 
 ranking_bp = Blueprint("ranking", __name__)
 
@@ -29,6 +30,31 @@ def ranking():
         })
 
     return render_template("ranking/ranking.html", date=date, rows=rank_rows)
+
+@ranking_bp.route("/ranking/side_panel/_ranking_panel", methods=['GET'])
+@login_required
+def liveRanking():
+    date = get_today_date()
+    rows = list(db.solves.find({"date": date, "status": "solved"}).sort([("score", -1), ("hints_user", 1), ("solved_at", 1)]).limit(5))
+    rank_rows=[]
+    for idx, row in enumerate(rows, start=1):
+        user = db.users.find_one({"_id": row["user_id"]})
+        rank_rows.append({
+            "rank": idx,
+            "nickname": user["nickname"] if row["user_id"] else "알 수 없음",
+            "score": row["score"],
+        })
+
+    # 테스트용 데이터 - mock_rows
+    mock_rows = [
+        {"rank": 1, "nickname": "테스트1", "score": random.randint(900, 1000)},
+        {"rank": 2, "nickname": "테스트2", "score": random.randint(900, 1000)},
+        {"rank": 3, "nickname": "테스트3", "score": random.randint(900, 1000)},
+    ]
+    return jsonify({
+        "status": "success",
+        "rows": mock_rows
+    })
 
 
 @ranking_bp.route("/history")

@@ -1,7 +1,67 @@
 <div class="card p-3 mb-3" style="border:2px dashed #c7c9e0;">
-    <div class="text-center mb-2">
-        <span class="badge text-bg-secondary">[ 팀원 B 작업 영역 ]</span>
-        <div class="fw-bold mt-2">오늘의 랭킹</div>
+    <div class="position-relative d-flex justify-content-center align-items-center mb-2">
+        <span class="fw-bold fs-3">오늘의 랭킹</span>
+            <a class="btn btn-outline-secondary btn-sm rounded-pill position-absolute end-0" href="ranking" style="">
+                전체 랭킹 보기<i class="bi bi-arrow-right"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"/></svg></i>
+            </a>
     </div>
-    <small class="text-muted text-center d-block">순위·닉네임·점수 표 (score DESC). ranking/ 사이드 partial · 작업순서 §2</small>
+    <div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>순위</th>
+                    <th>닉네임</th>
+                    <th>점수</th>
+                </tr>
+            </thead>
+            <tbody class="table-body">
+            </tbody>
+        </table>
+    </div>
 </div>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    $(document).ready(function(){
+        getRanking();
+        
+        setInterval(getRanking, 1000)
+    })
+    function getRanking(){
+        $.ajax({
+            type: "GET",
+            url: "/ranking/side_panel/_ranking_panel",
+            data: {},
+            success: function (response){
+                let rankings = response["rows"]; 
+                let trHtml = "";
+                let medal = "";
+                for(let i=0; i<rankings.length; i++){
+                    if(i===0){
+                        medal = "<span class='fs-6'>🥇</span>";
+                    }
+                    else if(i===1){
+                        medal = "<span class='fs-6'>🥈</span>";
+                    }
+                    else if(i===2){
+                        medal = "<span class='fs-6'>🥉</span>";
+                    } else {
+                        medal = "";
+                    }
+                    trHtml +=
+                        `   
+                            <tr> 
+                                <td>${medal}</td>
+                                <td>&nbsp;${rankings[i]["rank"]}</td>
+                                <td>${rankings[i]["nickname"]}</td>
+                                <td>${rankings[i]["score"]}</td>
+                            </tr>
+                        `;
+                    
+                }
+                $(".table-body").html(trHtml);
+            }
+        })
+    }
+</script>
