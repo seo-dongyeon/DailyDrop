@@ -85,10 +85,11 @@ def submit():
                              "$set": {"solved_at": datetime.now(timezone.utc)}})
         solve = db.solves.find_one({"user_id": g.user_id, "date": date})
         solved_at_utc = solve["solved_at"].replace(tzinfo=timezone.utc)
-        duration = (solved_at_utc.astimezone(
-            KST) - release_time).total_seconds()
+        started_at_utc = solve["started_at"].replace(tzinfo=timezone.utc)
+        duration = (solved_at_utc.astimezone(KST) - release_time).total_seconds()
+        start_to_solve = (solved_at_utc.astimezone(KST) - started_at_utc.astimezone(KST)).total_seconds()
         db.solves.update_one({"user_id": g.user_id, "date": date}, {
-                                     "$set": {"duration_sec": duration}})
+                                     "$set": {"duration_sec": start_to_solve}})
         score = calc_score(duration, solve["hints_used"])
         db.solves.update_one({"user_id": g.user_id, "date": date}, {
                              "$set": {"score": score}})
