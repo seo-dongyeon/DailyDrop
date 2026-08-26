@@ -89,12 +89,22 @@
     {% if current_user %}
     {% set ep = request.endpoint %}
     <aside class="app-sidebar bg-white border-end p-3 d-flex flex-column">
-      <a class="side-link {{ 'active' if ep == 'quiz.today' else '' }}" href="{{ url_for('quiz.today') }}">오늘의 퀴즈</a>
-      <a class="side-link {{ 'active' if ep == 'ranking.ranking' else '' }}"
-        href="{{ url_for('ranking.ranking') }}">랭킹</a>
-      <a class="side-link {{ 'active' if ep == 'ranking.history' else '' }}" href="{{ url_for('ranking.history') }}">내
-        기록</a>
-      <a class="side-link {{ 'active' if ep == 'quiz.archive' else '' }}" href="{{ url_for('quiz.archive') }}">지난 문제</a>
+      <a class="side-link {{ 'active' if ep == 'quiz.today' else '' }}" href="{{ url_for('quiz.today') }}">
+        <i class="bi bi-trophy"></i>
+        오늘의 퀴즈
+      </a>
+      <a class="side-link {{ 'active' if ep == 'ranking.ranking' else '' }}" href="{{ url_for('ranking.ranking') }}">
+        <i class="bi bi-award"></i>
+        랭킹
+      </a>
+      <a class="side-link {{ 'active' if ep == 'ranking.history' else '' }}" href="{{ url_for('ranking.history') }}">
+        <i class="bi bi-clock-history"></i>
+        내 기록
+      </a>
+      <a class="side-link {{ 'active' if ep == 'quiz.archive' else '' }}" href="{{ url_for('quiz.archive') }}">
+        <i class="bi bi-journal-check"></i>
+        지난 문제
+      </a>
       <a class="side-link mt-auto" href="{{ url_for('auth.logout') }}">로그아웃</a>
     </aside>
     {% endif %}

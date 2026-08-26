@@ -1,5 +1,5 @@
 <div class="position-relative d-flex justify-content-center align-items-center mb-2">
-    <span class="fw-bold fs-3">🏆 오늘의 랭킹</span>
+    <span class="fw-bold fs-3"><i class="bi bi-trophy-fill" style="color: #FFD700;"></i> 오늘의 랭킹</span>
     <a class="btn btn-outline-secondary btn-sm rounded-pill position-absolute end-0"
         href="{{ url_for('ranking.ranking') }}">
         전체 랭킹 보기 <i class="bi bi-arrow-right"></i>
@@ -39,13 +39,13 @@
                 let medal = "";
                 for (let i = 0; i < rankings.length; i++) {
                     if (i === 0) {
-                        medal = "<span class='fs-6'>🥇</span>";
+                        medal = "<i class='bi bi-award-fill' style='color: #FFD700;'></i>";
                     }
                     else if (i === 1) {
-                        medal = "<span class='fs-6'>🥈</span>";
+                        medal = "<i class='bi bi-award-fill' style='color: #C0C0C0;'></i>";
                     }
                     else if (i === 2) {
-                        medal = "<span class='fs-6'>🥉</span>";
+                        medal = "<i class='bi bi-award-fill' style='color: #CD7F32;'></i>";
                     } else {
                         medal = "";
                     }
