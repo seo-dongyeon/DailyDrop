@@ -8,7 +8,7 @@
     <div class="card p-3 mb-3">
       <div class="d-flex justify-content-between align-items-start">
         <div>
-          <h4 class="mb-1">오늘의 퀴즈</h4>
+          <h4 class="mb-1 fw-bold">오늘의 퀴즈</h4>
           <small class="text-muted">매일 하나의 개발 상식을 5개의 힌트로 맞혀보세요!</small>
         </div>
         <span class="text-muted">{{ date }}</span>
@@ -23,7 +23,7 @@
           <h5 class="mb-0">{{ problem.title }}</h5>
           <span class="badge text-bg-secondary text-uppercase">{{ problem.difficulty }}</span>
         </div>
-        <p class="fs-4 mb-0">Q. {{ problem.question }}</p>
+        <p class="fs-4 mb-0 fw-bold">Q. {{ problem.question }}</p>
       </div>
       {% endif %}
 
@@ -56,7 +56,7 @@
         {% endif %}
       </div>
       <hr>
-      <button id="hint-btn" class="btn btn-primary w-100">다음 힌트 열기</button>
+      <button id="hint-btn" class="btn btn-primary w-100 p-3">다음 힌트 열기</button>
     </div>
 
     <div class="card p-3 mb-3 text-center text-muted">
@@ -127,7 +127,7 @@
           $('#result').html('<div class="alert alert-success mb-0">🎉 정답! 점수 <b>' + res.score + '</b>점</div>');
           $('#answer-input').prop('disabled', true);
           $('#hint-btn').prop('disabled', true);
-        } 
+        }
         else {
           $('#result').html(
             '<div class="alert alert-danger mb-0">❌ 오답이에요. 다시 시도해보세요.</div>'
