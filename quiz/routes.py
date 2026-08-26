@@ -98,14 +98,14 @@ def submit():
     else:
         db.solves.update_one({"user_id": g.user_id, "date": date}, {
                              "$inc": {"attempts_used": 1}})
-        if solve["hints_used"] < (len(problem["hints"])-1):
+        if solve["hints_used"] < (len(problem["hints"])):
                 db.solves.update_one({"user_id": g.user_id, "date": date}, {
                                      "$inc": {"hints_used": 1}})
                 solve = db.solves.find_one({"user_id": g.user_id, "date": date})
                 return jsonify({
                             "isCorrect": False,
                             "score": None,
-                            "message": problem["hints"][solve["hints_used"]]["text"]
+                            "message": problem["hints"][solve["hints_used"]-1]["text"]
                         })
                 
         else:
