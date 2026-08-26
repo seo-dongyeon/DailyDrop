@@ -117,8 +117,8 @@ def archive():
             if i["date"] == x["date"]:
                 solved_num += 1
         for y in failed_list:
-            if i["date"] == y["date"]:
-                failed_num += 1
+                    if i["date"] == y["date"]:
+                        failed_num += 1
         if solved_num + failed_num == 0:
             accu = 0
         else:

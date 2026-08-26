@@ -6,17 +6,24 @@
 {# TODO: 지난 문제 카드 그리드 + 내 결과 #}
 <div class="row g-3">
   {% for p in problems %}
-    <div class="col-md-6">
-      <div class="card p-3 mb-3">
-        <p class="text-start">
-          {{ p.date }}
+    <div class="col-md-4">
+      <div class="card p-3 rounded-4 shadow-sm border-0">
+        <p class="d-flex justify-content-between">
+          <span class="small text-secondary fw-semibold">
+            {{ p.date }}
+          </span>
+          <span>
+            <span>정답률: </span>
+            <span class="badge rounded-pill bg-primary">{{ accu_list[loop.index0] }}%</span>
+          </span>
         </p>
-        <p class="text-center">
-          {{ p.title }} - 정답: {{p.answer}}
+        <p class="fs-5 fw-semibold mb-3">
+          {{ p.title }}
         </p>
-        <p class="text-end">
-          정답률: {{ accu_list[loop.index0] }}%
-        </p>
+      <p class="mb-0">
+        <span class="text-secondary">정답: </span>
+        <span class="fw-semibold ms-1">{{ p.answer }}</span>
+      </p>
       </div>
     </div>
   {% endfor %}
