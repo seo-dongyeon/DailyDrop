@@ -1,7 +1,49 @@
-<div class="card p-3" style="border:2px dashed #c7c9e0;">
-    <div class="text-center mb-2">
-        <span class="badge text-bg-secondary">[ 팀원 B 작업 영역 ]</span>
-        <div class="fw-bold mt-2">오늘의 통계</div>
+<div class="card p-3 mb-3" style="border:2px dashed #c7c9e0;">
+    <div class="position-relative d-flex justify-content-center align-items-center mb-2">
+        <span class='fs-3'>📶</span>
+        <span class="fw-bold fs-3">오늘의 통계</span>
     </div>
-    <small class="text-muted text-center d-block">도전 수 · 성공률 · 평균 힌트</small>
+    <div>
+        <ul class="list-group w-50 mx-auto">
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                도전한 사람
+                <span id="total_attempts" class="fw-bold fs-6"></span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                성공률
+                <span id="total_solved" class="fw-bold fs-6"></span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                평균 힌트 사용
+                <span id="total_hints" class="fw-bold fs-6"></span>
+            </li>
+        </ul>
+    </div>
 </div>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    $(document).ready(function(){
+        getStats();
+    })
+
+    function getStats(){
+        let total_attempts = "";
+        let total_hints = "";
+        let total_solved = "";
+        $.ajax({
+            type: "GET",
+            url: "/ranking/side_panel/_stats_panel",
+            data: {},
+            success: function(response){
+                total_attempts = response["attempts"];
+                total_hints = response["hints"];
+                total_solved = response["solved"];
+
+                $("#total_attempts").text(total_attempts+"명");
+                $("#total_hints").text(total_hints+"개");
+                $("#total_solved").text(total_solved+"%");
+            }
+        })
+    }
+</script>
