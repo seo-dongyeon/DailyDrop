@@ -43,17 +43,18 @@ def signup():
         hashed = bcrypt.hashpw(password.encode("utf-8"),
                                bcrypt.gensalt()).decode("utf-8")
         try:
-            db.users.insert_one({
+            result = db.users.insert_one({
                 "username": username,
                 "password": hashed,
                 "nickname": nickname,
                 "created_at": datetime.now(timezone.utc),
             })
+            session["user_id"] = str(result.inserted_id)
         except DuplicateKeyError as e:
             field = "닉네임" if "nickname" in str(e) else "아이디"
             return render_template("auth/signup.html",
                                    error=f"이미 존재하는 {field}입니다.")
-        return redirect(url_for("auth.login"))
+        return redirect(url_for("quiz.today"))
     return render_template("auth/signup.html")
 
 
