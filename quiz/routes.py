@@ -106,12 +106,12 @@ def archive():
     failed_list = list(db.solves.find({"status": "failed"}))
     accu_list = []
     for i in problems:
+        failed_num = 0
+        solved_num = 0
         for x in solved_list:
-            solved_num = 0
             if i["date"] == x["date"]:
                 solved_num += 1
         for y in failed_list:
-                    failed_num = 0
                     if i["date"] == y["date"]:
                         failed_num += 1
         if solved_num + failed_num == 0:
