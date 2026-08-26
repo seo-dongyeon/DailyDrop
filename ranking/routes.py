@@ -1,23 +1,15 @@
-"""[팀원 B 담당] 랭킹 · 통계 · 내 기록.
-
-공용 도구: db(core.db) / login_required(core.auth) / get_today_date(core.utils)
-스키마·복붙 스니펫: docs/DailyDrop-백엔드-설계.md §3 참고
-랭킹 정렬 = score DESC → solved_at ASC (점수제 확정).
-아래는 '돌아가는 스텁' — TODO 부분을 실제 로직으로 채우면 됨.
-"""
 from flask import Blueprint, render_template, g
 from core.db import db
 from core.auth import login_required
 from core.utils import get_today_date
+from datetime import datetime
 
 ranking_bp = Blueprint("ranking", __name__)
-
 
 @ranking_bp.route("/ranking")
 @login_required
 def ranking():
     date = get_today_date()
-    # TODO(팀원 B): 닉네임 조인 + 내 순위 강조
     # 정렬 우선순위: 점수 > 힌트 사용횟수 > 풀이 완료 시각
     rows = list(db.solves.find({"date": date, "status": "solved"})
                 .sort([("score", -1), ("hints_used", 1),("solved_at", 1)]))
@@ -42,7 +34,6 @@ def ranking():
 @ranking_bp.route("/history")
 @login_required
 def history():
-    # TODO(팀원 B): 내 풀이 히스토리 + 통계(총 풀이·평균 힌트·streak)
     mine = list(db.solves.find({"user_id": g.user_id}).sort("date", -1))
     history = []
     for m in mine:
@@ -67,16 +58,24 @@ def history():
             dates.append(m.get("date"))
     # 2) 연속이면 current_streak+1
     #   Q.2-1) 연속인지 아닌지 판별하는 방법이 뭘까?
-    #   A. timedelta 객체를 사용하여 두 날짜 사이의 일수 차이를 계산한다. 기준 날짜 - 이전 날짜 수 == 1 => current_streak+1
-    current_streak = 0
-    max_streak = 0
-    for idx, m in enumerate(dates, start=1):
-        if((dates[idx]-dates[idx-1]).days == 1):
+    #   A. datetime 객체를 사용하여 두 날짜 사이의 일수 차이를 계산한다. 기준 날짜 - 이전 날짜 수 == 1 => current_streak+1
+    current_streak = 1
+    max_streak = 0 
+    # 연속일은 문제를 푼 날부터 +1 (연속된 횟수로 접근하지 않음.)
+    # 리스트 안에 나열되어 있는 앞뒤 날짜 데이터를 뺀 값이 1일 때만 current_streak +1 카운팅
+    for idx in range(1, len(dates)):
+        print("기준날짜: "+dates[idx-1]+"이전날짜: "+dates[idx])
+        conseDays = (datetime.strptime(dates[idx-1], "%Y-%m-%d").date() - datetime.strptime(dates[idx], "%Y-%m-%d").date()).days
+        if( conseDays == 1):
             current_streak += 1
         else:
-            
+            current_streak = 1   
+    
     # 3) current_streak > max_streak => max_streak = current_streak break
         if(current_streak > max_streak):
             max_streak = current_streak
+
+    print(max_streak)
+
     
-    return render_template("ranking/history.html", mine=history, total=total, avg_solved=avg_solved, avg_hints=avg_hints)
+    return render_template("ranking/history.html", mine=history, total=total, avg_solved=avg_solved, avg_hints=avg_hints, max_streak=max_streak)
