@@ -4,7 +4,7 @@
 스키마·복붙 스니펫: docs/DailyDrop-백엔드-설계.md §3 참고
 아래는 '돌아가는 스텁' — TODO 부분을 실제 로직으로 채우면 됨.
 """
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from flask import Blueprint, render_template, request, jsonify, g
 from core.db import db
 from core.auth import login_required
@@ -64,6 +64,8 @@ def hint():
 @login_required
 def submit():
     # TODO(팀원 A): 정규화 채점 → 정답 시 calc_score(duration, hints_used)로 score 저장
+    KST = timezone(timedelta(hours=9))
+    
     user_answer = request.form.get("answer")
     user_answer = user_answer.strip().lower()
     date = get_today_date()
@@ -71,7 +73,11 @@ def submit():
     problem_list = [problem["answer"]]
     for i in problem["accepted"]:
         problem_list.append(i.strip())
-
+    release_time = datetime.strptime(problem["date"], "%Y-%m-%d").replace(
+            hour=10,
+            tzinfo=KST
+        )
+    
     isCorrect = 0
     for i in problem_list:
         if i == user_answer:
@@ -84,7 +90,8 @@ def submit():
         db.solves.update_one({"user_id": g.user_id, "date": date}, {
                              "$set": {"solved_at": datetime.now(timezone.utc)}})
         solve = db.solves.find_one({"user_id": g.user_id, "date": date})
-        duration = (solve["solved_at"] - solve["started_at"]).total_seconds()
+        solved_at_utc = solve["solved_at"].replace(tzinfo=timezone.utc)
+        duration = (solved_at_utc.astimezone(KST) - release_time).total_seconds()
         score = calc_score(duration, solve["hints_used"])
         db.solves.update_one({"user_id": g.user_id, "date": date}, {
                              "$set": {"score": score}})
