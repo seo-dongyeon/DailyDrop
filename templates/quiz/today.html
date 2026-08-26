@@ -127,8 +127,28 @@
           $('#result').html('<div class="alert alert-success mb-0">🎉 정답! 점수 <b>' + res.score + '</b>점</div>');
           $('#answer-input').prop('disabled', true);
           $('#hint-btn').prop('disabled', true);
-        } else {
-          $('#result').html('<div class="alert alert-danger mb-0">❌ 오답이에요. 다시 시도해보세요.</div>');
+        } 
+        else {
+          $('#result').html(
+            '<div class="alert alert-danger mb-0">❌ 오답이에요. 다시 시도해보세요.</div>'
+          );
+
+          if (res.message) {
+            var n = (parseInt($('#hint-count').text(), 10) || 0) + 1;
+
+            var $row = $(
+              '<div class="d-flex align-items-center gap-4 p-2 mb-2 rounded" style="background:#f1f2f9;">'
+              + '<i class="bi bi-' + n + '-circle-fill text-primary fs-4"></i>'
+              + '<span></span></div>'
+            );
+
+            $row.find('span').text(res.message);
+            $('#hint-list').append($row);
+            $('#hint-count').text(n);
+
+            if (n >= total) showDone();
+          }
+
           $btn.prop('disabled', false);
         }
       }).fail(function () {

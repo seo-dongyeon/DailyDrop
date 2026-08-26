@@ -103,7 +103,8 @@ def submit():
                                      "$inc": {"hints_used": 1}})
                 solve = db.solves.find_one({"user_id": g.user_id, "date": date})
                 return jsonify({
-                            "success": True,
+                            "isCorrect": False,
+                            "score": None,
                             "message": problem["hints"][solve["hints_used"]]["text"]
                         })
                 
