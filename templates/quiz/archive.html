@@ -4,18 +4,19 @@
 <h2>지난 문제</h2>
 {# ===== [팀원 A 작업 영역] ===== #}
 {# TODO: 지난 문제 카드 그리드 + 내 결과 #}
-<div class="row g-3">
+<div class="row g-2">
   {% for p in problems %}
-    <div class="col-md-6">
-      <div class="card p-3 mb-3">
+    <div class="col-md-4">
+      <div class="card p-2 mb-2">
+        <p class="d-flex justify-content-between">
+          <span>[ {{ p.date }} ]</span>
+          <span>정답률: {{ accu_list[loop.index0] }}%</span>
+        </p>
         <p class="text-start">
-          {{ p.date }}
+          {{ p.title }}
         </p>
-        <p class="text-center">
-          {{ p.title }} - 정답: {{p.answer}}
-        </p>
-        <p class="text-end">
-          정답률: {{ accu_list[loop.index0] }}%
+        <p class="text-start">
+          정답: {{p.answer}}
         </p>
       </div>
     </div>
