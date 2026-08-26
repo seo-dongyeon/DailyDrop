@@ -22,16 +22,16 @@ def today():
     # TODO(팀원 A): solve 없으면 status="solving" 문서 생성 (§3 스니펫)
     if solve is None:
         db.solves.insert_one({"user_id": g.user_id, "problem_id": problem["_id"],
-        "date": date, "status": "solving", "hints_used": 0, "attempts_used": 0,
-        "started_at": datetime.now(timezone.utc), "solved_at": None,
-        "duration_sec": 0, "score": 0})
-        
+                              "date": date, "status": "solving", "hints_used": 0, "attempts_used": 0,
+                              "started_at": datetime.now(timezone.utc), "solved_at": None,
+                              "duration_sec": 0, "score": 0})
+
         solve = db.solves.find_one({"user_id": g.user_id, "date": date})
-    
+
     # TODO(팀원 A): 잠긴 힌트 노출 금지 → problem.hints[:solve.hints_used] 만 전달
-    public_problem = {"id": problem["_id"], "date": date, "week": problem["week"],"title": problem["title"], 
-    "question": problem["question"], "difficulty": problem["difficulty"], 
-    "hints": problem["hints"][:solve["hints_used"]], "created_at": problem["created_at"]}
+    public_problem = {"id": problem["_id"], "date": date, "week": problem["week"], "title": problem["title"],
+                      "question": problem["question"], "difficulty": problem["difficulty"],
+                      "hints": problem["hints"][:solve["hints_used"]], "created_at": problem["created_at"]}
 
     return render_template("quiz/today.html", date=date, problem=problem, solve=solve)
 
@@ -43,21 +43,21 @@ def hint():
     date = get_today_date()
     solve = db.solves.find_one({"user_id": g.user_id, "date": date})
     problem = db.problems.find_one({"date": date})
-    
+
     if solve["hints_used"] < (len(problem["hints"])-1):
-        db.solves.update_one({"user_id": g.user_id, "date": date}, {"$inc": {"hints_used": 1}})
+        db.solves.update_one({"user_id": g.user_id, "date": date}, {
+                             "$inc": {"hints_used": 1}})
         solve = db.solves.find_one({"user_id": g.user_id, "date": date})
         return jsonify({
             "success": True,
             "message": problem["hints"][solve["hints_used"]]["text"]
-            })
-    
+        })
+
     else:
         return jsonify({
-                    "success": True,
-                    "message": "모든 힌트를 소진했습니다"
-                    })
-            
+            "success": True,
+            "message": "모든 힌트를 소진했습니다"
+        })
 
 
 @quiz_bp.route("/submit", methods=["POST"])
@@ -71,53 +71,57 @@ def submit():
     problem_list = [problem["answer"]]
     for i in problem["accepted"]:
         problem_list.append(i.strip())
-    
+
     isCorrect = 0
     for i in problem_list:
         if i == user_answer:
             isCorrect = 1
             break
-    
+
     if isCorrect:
-        db.solves.update_one({"user_id": g.user_id, "date": date}, {"$set": {"status": "solved"}})
-        db.solves.update_one({"user_id": g.user_id, "date": date}, {"$set": {"solved_at": datetime.now(timezone.utc)}})
+        db.solves.update_one({"user_id": g.user_id, "date": date}, {
+                             "$set": {"status": "solved"}})
+        db.solves.update_one({"user_id": g.user_id, "date": date}, {
+                             "$set": {"solved_at": datetime.now(timezone.utc)}})
         solve = db.solves.find_one({"user_id": g.user_id, "date": date})
-        score = calc_score(solve["solved_at"], solve["hints_used"])
-        db.solves.update_one({"user_id": g.user_id, "date": date}, {"$set": {"score": score}})
+        duration = (solve["solved_at"] - solve["started_at"]).total_seconds()
+        score = calc_score(duration, solve["hints_used"])
+        db.solves.update_one({"user_id": g.user_id, "date": date}, {
+                             "$set": {"score": score}})
         return jsonify({
             "isCorrect": True,
             "score": score
         })
-    
+
     else:
-        db.solves.update_one({"user_id": g.user_id, "date": date}, {"$inc": {"attempts_used": 1}})
+        db.solves.update_one({"user_id": g.user_id, "date": date}, {
+                             "$inc": {"attempts_used": 1}})
         return jsonify({
-                    "isCorrect": False,
-                    "score": None
-                })
+            "isCorrect": False,
+            "score": None
+        })
 
 
 @quiz_bp.route("/archive")
 @login_required
 def archive():
-    # TODO(팀원 A): 지난 문제 목록 + 정답률
-    problems = list(db.problems.find({"date": {"$lt": get_today_date()}}).sort("date", -1))
+    problems = list(db.problems.find(
+        {"date": {"$lt": get_today_date()}}).sort("date", -1))
     solved_list = list(db.solves.find({"status": "solved"}))
     failed_list = list(db.solves.find({"status": "failed"}))
     accu_list = []
     for i in problems:
+        failed_num = 0
+        solved_num = 0
         for x in solved_list:
-            solved_num = 0
             if i["date"] == x["date"]:
                 solved_num += 1
         for y in failed_list:
-                    failed_num = 0
-                    if i["date"] == y["date"]:
-                        failed_num += 1
+            if i["date"] == y["date"]:
+                failed_num += 1
         if solved_num + failed_num == 0:
             accu = 0
         else:
             accu = solved_num / (solved_num + failed_num)
         accu_list.append(accu * 100)
-        
     return render_template("quiz/archive.html", problems=problems, accu_list=accu_list)
