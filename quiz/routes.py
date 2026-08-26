@@ -55,7 +55,7 @@ def hint():
 
     else:
         return jsonify({
-            "success": True,
+            "success": False,
             "message": "모든 힌트를 소진했습니다"
         })
 
@@ -70,6 +70,7 @@ def submit():
     user_answer = user_answer.strip().lower()
     date = get_today_date()
     problem = db.problems.find_one({"date": date})
+    solve = db.solves.find_one({"user_id": g.user_id, "date": date})
     problem_list = [problem["answer"]]
     for i in problem["accepted"]:
         problem_list.append(i.strip())
@@ -103,10 +104,20 @@ def submit():
     else:
         db.solves.update_one({"user_id": g.user_id, "date": date}, {
                              "$inc": {"attempts_used": 1}})
-        return jsonify({
-            "isCorrect": False,
-            "score": None
-        })
+        if solve["hints_used"] < (len(problem["hints"])-1):
+                db.solves.update_one({"user_id": g.user_id, "date": date}, {
+                                     "$inc": {"hints_used": 1}})
+                solve = db.solves.find_one({"user_id": g.user_id, "date": date})
+                return jsonify({
+                            "success": True,
+                            "message": problem["hints"][solve["hints_used"]]["text"]
+                        })
+                
+        else:
+            return jsonify({
+                "isCorrect": False,
+                "score": None
+            })
 
 
 @quiz_bp.route("/archive")
