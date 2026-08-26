@@ -4,9 +4,20 @@
 <h2>지난 문제</h2>
 {# ===== [팀원 A 작업 영역] ===== #}
 {# TODO: 지난 문제 카드 그리드 + 내 결과 #}
-<ul>
+<div class="row g-3">
   {% for p in problems %}
-    <li>{{ p.date }} — {{ p.title }}</li>
+    <div class="col-md-6">
+      <div class="card p-3 mb-3">
+        <p class="text-start">
+          {{ p.date }}
+        </p>
+        <p class="text-center">
+          {{ p.title }} - 정답: {{p.answer}}
+        </p>
+        <p class="text-end">
+          
+      </div>
+    </div>
   {% endfor %}
-</ul>
+  </div>
 {% endblock %}
