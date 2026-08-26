@@ -96,14 +96,12 @@ def history():
         if(m["status"] == "solved"):
             dates.append(m.get("date"))
     # 2) 연속이면 current_streak+1
-    #   Q.2-1) 연속인지 아닌지 판별하는 방법이 뭘까?
-    #   A. datetime 객체를 사용하여 두 날짜 사이의 일수 차이를 계산한다. 기준 날짜 - 이전 날짜 수 == 1 => current_streak+1
+    # datetime 객체를 사용하여 두 날짜 사이의 일수 차이를 계산한다. 기준 날짜 - 이전 날짜 수 == 1 => current_streak+1
     current_streak = 1
     max_streak = 0 
     # 연속일은 문제를 푼 날부터 +1 (연속된 횟수로 접근하지 않음.)
     # 리스트 안에 나열되어 있는 앞뒤 날짜 데이터를 뺀 값이 1일 때만 current_streak +1 카운팅
     for idx in range(1, len(dates)):
-        print("기준날짜: "+dates[idx-1]+"이전날짜: "+dates[idx])
         conseDays = (datetime.strptime(dates[idx-1], "%Y-%m-%d").date() - datetime.strptime(dates[idx], "%Y-%m-%d").date()).days
         if( conseDays == 1):
             current_streak += 1
@@ -113,9 +111,6 @@ def history():
     # 3) current_streak > max_streak => max_streak = current_streak break
         if(current_streak > max_streak):
             max_streak = current_streak
-
-    print(max_streak)
-
     
     return render_template("ranking/history.html", mine=history, total=total, avg_solved=avg_solved, avg_hints=avg_hints, max_streak=max_streak)
 
