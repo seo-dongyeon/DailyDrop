@@ -3,7 +3,7 @@
 {% block content %}
 <div class="row g-4">
 
-  <!-- ===== 중앙: 오늘의 퀴즈 [팀원 A 작업 영역] ===== -->
+  <!-- ===== 중앙: 퀴즈 헤더 ===== -->
   <div class="col-lg-8">
     <div class="card p-3 mb-3">
       <div class="d-flex justify-content-between align-items-start">
@@ -15,24 +15,48 @@
       </div>
     </div>
 
-    <div class="card p-4 mb-3" style="border:2px dashed #c7c9e0;">
+    <!-- ===== 중앙: 퀴즈 메인 ===== -->
+    <div class="card p-4 mb-3" style="border:1px solid #c7c9e0;">
+      {% if problem %}
+      <div class="mb-4">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <h5 class="mb-0">{{ problem.title }}</h5>
+          <span class="badge text-bg-secondary text-uppercase">{{ problem.difficulty }}</span>
+        </div>
+        <p class="fs-4 mb-0">Q. {{ problem.question }}</p>
+      </div>
+      {% endif %}
+
       <div class="text-center mb-3">
-        <span class="badge text-bg-primary">[ 팀원 A 작업 영역 ]</span>
-        <p class="text-muted mt-2 mb-1">여기에 <b>힌트 리스트 · 정답 입력 · 제출/다음 힌트 버튼</b>을 구현하세요.</p>
-        <small class="text-muted">파일: quiz/routes.py + templates/quiz/today.html · 작업순서 §1</small>
+        <!-- 힌트 헤더 -->
+        <div class="mb-3 d-flex justify-content-between">
+          <span class="badge rounded-pill text-bg-light border px-3 py-2 fs-6">
+            힌트 <span id="hint-count">{{ solve.hints_used }}</span>/{{ problem.hints|length }}
+          </span>
+        </div>
+        <div id="hint-list" data-total="{{ problem.hints|length }}">
+          {% for hint in problem.hints[:solve.hints_used] %}
+          <div class="d-flex align-items-center gap-4 p-2 mb-2 rounded" style="background:#f1f2f9;">
+            <i class="bi bi-{{ loop.index }}-circle-fill text-primary fs-4"></i>
+            <span>{{ hint.text }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <form id="answer-form" class="d-flex gap-2 mb-2"
+        data-solved="{{ 'true' if solve.status == 'solved' else 'false' }}">
+        <input id="answer-input" class="form-control form-control-lg flex-grow-1" placeholder="정답을 입력하세요"
+          autocomplete="off">
+        <button type="submit" class="btn btn-success btn-lg px-3 flex-shrink-0">제출하기</button>
+      </form>
+      <div id="result" class="mb-2">
+        {% if solve.status == 'solved' %}
+        <div class="alert alert-success mb-0">🎉 이미 오늘 문제를 풀었어요! 점수 <b>{{ solve.score }}</b>점</div>
+        {% endif %}
       </div>
       <hr>
-      {% if problem %}
-      <p class="text-center fs-5 mb-3">{{ problem.title }} <span class="text-muted fs-6">(예시)</span></p>
-      {% else %}
-      <div class="alert alert-warning">오늘 문제 없음 → <code>python seed.py</code> 실행</div>
-      {% endif %}
-      {# 아래는 레이아웃 참고용 자리표시 (팀원 A가 실제 동작 구현) #}
-      <div class="d-flex gap-2 mb-2">
-        <input class="form-control" placeholder="정답 입력" disabled>
-        <button class="btn btn-success px-4" disabled>제출</button>
-      </div>
-      <button class="btn btn-primary w-100" disabled>다음 힌트 열기</button>
+      <button id="hint-btn" class="btn btn-primary w-100">다음 힌트 열기</button>
     </div>
 
     <div class="card p-3 mb-3 text-center text-muted">
@@ -46,18 +70,75 @@
   <!-- ===== 우측: 랭킹 + 통계 [팀원 B 작업 영역] ===== -->
   <div class="col-lg-4">
     <!-- 랭킹: 1분 폴링 (확정) -->
-    <div class="card p-3 mb-3" style="border:2px dashed #c7c9e0;">
-      <!-- <div id="ranking-panel"> -->
+    <div class="card p-3 mb-3" style="border:2px solid #c7c9e0;">
       {% include "ranking/side_panel/_ranking_panel.html" %}
-      <!-- </div> -->
-
     </div>
-    <div class="card p-3" style="border:2px dashed #c7c9e0;">
-      <!-- <div id="stats-panel"> -->
+    <div class="card p-3" style="border:2px solid #c7c9e0;">
       {% include "ranking/side_panel/_stats_panel.html" %}
-      <!-- </div> -->
     </div>
   </div>
 
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  $(function () {
+    var total = parseInt($('#hint-list').data('total'), 10) || 0;
+
+    function showDone() {
+      $('#hint-btn').prop('disabled', true).removeClass('btn-primary').addClass('btn-light border text-secondary').html('<i class="bi bi-lock-fill me-2"></i>모든 힌트 공개 완료');
+    }
+
+    if ((parseInt($('#hint-count').text(), 10) || 0) >= total) showDone();
+
+    // 이미 푼 문제면 로드 시점에 잠금 (새로고침해도 재도전 방지)
+    var solved = String($('#answer-form').data('solved')) === 'true';
+    if (solved) {
+      $('#answer-input, #answer-form button[type="submit"], #hint-btn').prop('disabled', true);
+    }
+
+    $('#hint-btn').on('click', function () {
+      $.post('{{ url_for("quiz.hint") }}', function (res) {
+        if (!res.success) return showDone();
+
+        var n = (parseInt($('#hint-count').text(), 10) || 0) + 1;
+        var $row = $('<div class="d-flex align-items-center gap-4 p-2 mb-2 rounded" style="background:#f1f2f9;">'
+          + '<i class="bi bi-' + n + '-circle-fill text-primary fs-4"></i>'
+          + '<span></span></div>');
+        $row.find('span').text(res.message);
+        $('#hint-list').append($row);
+        $('#hint-count').text(n);
+
+        if (n >= total) showDone();
+      });
+    });
+
+    $('#answer-form').on('submit', function (e) {
+      e.preventDefault();
+
+      var answer = $('#answer-input').val().trim();
+      if (!answer) return;
+
+      var $btn = $(this).find('button[type="submit"]').prop('disabled', true);
+
+      $.post('{{ url_for("quiz.submit") }}', { answer: answer }, function (res) {
+        if (res.isCorrect) {
+          $('#result').html('<div class="alert alert-success mb-0">🎉 정답! 점수 <b>' + res.score + '</b>점</div>');
+          $('#answer-input').prop('disabled', true);
+          $('#hint-btn').prop('disabled', true);
+        } else {
+          $('#result').html('<div class="alert alert-danger mb-0">❌ 오답이에요. 다시 시도해보세요.</div>');
+          $btn.prop('disabled', false);
+        }
+      }).fail(function () {
+        $('#result').html('<div class="alert alert-warning mb-0">오류가 발생했어요. 잠시 후 다시 시도해주세요.</div>');
+        $btn.prop('disabled', false);
+      });
+    });
+
+  });
+
+</script>
+
 {% endblock %}
