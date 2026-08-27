@@ -1,6 +1,7 @@
 """MongoDB 연결 + 인덱스 (공용). 팀원은 `from core.db import db` 만 하면 됨."""
 import os
 from pymongo import MongoClient, ASCENDING, DESCENDING
+from pymongo.errors import OperationFailure
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -15,7 +16,18 @@ def ensure_indexes():
     db.users.create_index("username", unique=True)
     db.users.create_index("nickname", unique=True)
 
-    db.problems.create_index("date", unique=True)
+    # problems.date: pool(날짜 미배정) 문제를 여러 개 허용하려고
+    # "문자열 date만" 유니크로 거는 부분 인덱스(partial). date 없는 pool은 제약 X.
+    try:
+        db.problems.create_index(
+            "date", unique=True,
+            partialFilterExpression={"date": {"$type": "string"}})
+    except OperationFailure:
+        db.problems.drop_index("date_1")            # 기존 plain 유니크 인덱스 제거 후
+        db.problems.create_index(                   # 부분 인덱스로 재생성
+            "date", unique=True,
+            partialFilterExpression={"date": {"$type": "string"}})
+
     # 하루 1회 보장 + 재진입 상태복원
     db.solves.create_index([("user_id", ASCENDING), ("date", ASCENDING)],
                            unique=True)
