@@ -123,7 +123,7 @@ def stats():
 
     total_attempts = len(rows) # 퀴즈가 나온 시점의 총 도전 수
     total_avg_solved = round((sum(r.get("status") == "solved" for r in rows) / total_attempts)*100, 1) if total_attempts else 0
-    total_avg_hints = round((sum(r.get("hints_used")== 0 for r in rows)) / total_attempts, 1) if total_attempts else 0
+    total_avg_hints = round((sum(r.get("hints_used", 0) for r in rows)) / total_attempts, 1) if total_attempts else 0
 
     print(total_avg_solved,total_avg_hints,total_attempts)
     return jsonify({
