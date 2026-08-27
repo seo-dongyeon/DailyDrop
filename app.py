@@ -7,6 +7,7 @@ from core.db import ensure_indexes
 from core.auth import auth_bp
 from quiz.routes import quiz_bp
 from ranking.routes import ranking_bp
+from demo.routes import demo_bp        # [데모 전용] 배포 전 제거
 
 load_dotenv()
 
@@ -18,6 +19,7 @@ def create_app():
     app.register_blueprint(auth_bp)      # /signup /login /logout
     app.register_blueprint(quiz_bp)      # / /hint /submit /archive  (팀원 A)
     app.register_blueprint(ranking_bp)   # /ranking /history          (팀원 B)
+    app.register_blueprint(demo_bp)      # [데모 전용] /demo/*  ⚠️ 배포 전 제거
 
     # 모든 템플릿에서 current_user(로그인 유저) 사용 가능 → base.html nav·유저메뉴
     @app.context_processor
