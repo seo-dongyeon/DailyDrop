@@ -1,6 +1,24 @@
 {% extends "base.html" %}
 {% block title %}오늘의 퀴즈 · DailyDrop{% endblock %}
 {% block content %}
+
+<!-- ===== [데모 전용] 날짜 이동 바 — ⚠️ 배포 전 제거 ===== -->
+<div class="alert alert-warning d-flex align-items-center justify-content-center gap-3 mb-4 py-2">
+  <span class="fw-bold">🧪 데모</span>
+  <form method="post" action="{{ url_for('demo.shift_day') }}" class="d-inline m-0">
+    <input type="hidden" name="days" value="-1">
+    <button class="btn btn-sm btn-outline-dark">◀ 이전 날</button>
+  </form>
+  <span class="badge text-bg-dark fs-6">오늘: {{ date }}</span>
+  <form method="post" action="{{ url_for('demo.shift_day') }}" class="d-inline m-0">
+    <input type="hidden" name="days" value="1">
+    <button class="btn btn-sm btn-outline-dark">다음 날 ▶</button>
+  </form>
+  <form method="post" action="{{ url_for('demo.reset') }}" class="d-inline m-0">
+    <button class="btn btn-sm btn-link text-decoration-none">리셋</button>
+  </form>
+</div>
+
 <div class="row g-4">
 
   <!-- ===== 중앙: 퀴즈 헤더 ===== -->
