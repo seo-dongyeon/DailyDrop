@@ -6,6 +6,7 @@
 """
 from datetime import datetime, timezone, timedelta
 from flask import Blueprint, render_template, request, jsonify, g
+from pymongo.errors import DuplicateKeyError
 from core.db import db
 from core.auth import login_required
 from core.utils import get_today_date, calc_score
@@ -18,8 +19,29 @@ quiz_bp = Blueprint("quiz", __name__)
 def today():
     date = get_today_date()
     problem = db.problems.find_one({"date": date})
-    solve = db.solves.find_one({"user_id": g.user_id, "date": date})
 
+    # [랜덤 출제] 오늘 날짜에 문제가 아직 없으면 → pool(날짜 미배정)에서 랜덤 1개 뽑아 오늘로 배정
+    if problem is None:
+        cands = list(db.problems.aggregate([
+            {"$match": {"date": {"$exists": False}}},   # 아직 안 쓴 문제 pool
+            {"$sample": {"size": 1}}                     # 그 중 랜덤 1개
+        ]))
+        if cands:
+            try:
+                # 원자적 배정: 아직 date가 없을 때만 오늘 날짜 찍음 (동시접속 레이스 방지)
+                db.problems.update_one(
+                    {"_id": cands[0]["_id"], "date": {"$exists": False}},
+                    {"$set": {"date": date}}
+                )
+            except DuplicateKeyError:
+                pass   # 다른 요청이 먼저 오늘 문제를 배정함 → 아래서 그걸 읽음
+            problem = db.problems.find_one({"date": date})
+
+    # pool까지 소진돼 문제가 하나도 없으면 → 빈 상태로 안내
+    if problem is None:
+        return render_template("quiz/today.html", date=date, problem=None, solve=None)
+
+    solve = db.solves.find_one({"user_id": g.user_id, "date": date})
     if solve is None:
         db.solves.insert_one({"user_id": g.user_id, "problem_id": problem["_id"],
                               "date": date, "status": "solving", "hints_used": 0, "attempts_used": 0,

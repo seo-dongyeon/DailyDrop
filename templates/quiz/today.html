@@ -25,7 +25,6 @@
         </div>
         <p class="fs-4 mb-0 fw-bold">Q. {{ problem.question }}</p>
       </div>
-      {% endif %}
 
       <div class="text-center mb-3">
         <!-- 힌트 헤더 -->
@@ -57,6 +56,9 @@
       </div>
       <hr>
       <button id="hint-btn" class="btn btn-primary w-100 p-3">다음 힌트 열기</button>
+      {% else %}
+      <div class="alert alert-warning mb-0 text-center">오늘 낼 문제가 없어요 (문제 pool이 비었습니다).</div>
+      {% endif %}
     </div>
 
     <div class="card p-3 mb-3 text-center text-muted">
