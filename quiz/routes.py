@@ -112,8 +112,11 @@ def submit():
                         })
                 
         else:
+            db.solves.update_one({"user_id": g.user_id, "date": date}, {
+                                         "$set": {"status": "failed"}})
             return jsonify({
                 "isCorrect": False,
+                "isFailed": True,
                 "score": None
             })
 
