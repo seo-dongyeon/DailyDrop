@@ -26,7 +26,8 @@
     $(document).ready(function () {
         getRanking();
 
-        setInterval(getRanking, 60000)
+        // setInterval(getRanking, 60000)
+        setInterval(getRanking, 15000) //테스트 코드
     })
     function getRanking() {
         $.ajax({
