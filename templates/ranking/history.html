@@ -56,7 +56,7 @@
           <td>
             {% if m.status == "solved" %}
               <span class="badge text-bg-success">정답</span>
-            {% else %}
+            {% elif m.status == "failed" %}
               <span class="badge text-bg-danger">실패</span>
             {% endif %}
           </td>
